@@ -1,0 +1,5 @@
+package agrimages.PadraoCommand;
+
+public interface CorrecaoCommand {
+	public void executaCorrecao();
+}

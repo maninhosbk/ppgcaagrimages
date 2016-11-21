@@ -1,0 +1,69 @@
+package agrimages.Correcoes;
+
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+public class FiltroRuido3Canal implements AbstractFiltro3Canal{
+	private Mat src;
+	private Mat dst;
+	
+	@Override
+	public Mat getResult() {
+		// TODO Auto-generated method stub
+		return dst;
+	}
+	@Override
+	public void filtrarImagem3Canal(Mat imagem, int filtro) {
+		// TODO Auto-generated method stub
+		src = imagem;
+		dst = new Mat(src.height(),src.width(),src.type());
+		switch(filtro){
+			case 1:{
+				Imgproc.blur(src, dst, new Size(3,3));
+			}break;
+			case 2:{
+				Imgproc.blur(src, dst, new Size(5,5));
+			}break;
+			case 3:{
+				Imgproc.blur(src, dst, new Size(7,7));
+			}break;
+			case 4:{
+				Imgproc.blur(src, dst, new Size(9,9));
+			}break;
+			case 5:{
+				Imgproc.blur(src, dst, new Size(11,11));
+			}break;
+			
+			//Median Blur
+			case 6:{
+				Imgproc.medianBlur(src, dst, 3);
+			}break;
+			
+			case 7:{
+				Imgproc.medianBlur(src, dst, 5);
+			}break;
+			
+			//Gaussiano
+			case 8:{
+				Imgproc.GaussianBlur(src, dst, new Size(3,3), 0.0);
+			}break;
+			case 9:{
+				Imgproc.GaussianBlur(src, dst, new Size(5,5), 0.0);
+			}break;
+			case 10:{
+				Imgproc.GaussianBlur(src, dst, new Size(7,7), 0.0);
+			}break;
+			case 11:{
+				Imgproc.GaussianBlur(src, dst, new Size(9,9), 0.0);
+			}break;
+			case 12:{
+				Imgproc.GaussianBlur(src, dst, new Size(11,11), 0.0);
+			}break;
+			
+			default:
+				break;
+			
+		}
+	}
+}

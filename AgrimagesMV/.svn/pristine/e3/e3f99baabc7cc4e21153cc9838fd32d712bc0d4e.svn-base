@@ -1,0 +1,538 @@
+package mvc_view;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.functions.SMO;
+import weka.classifiers.trees.J48;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.converters.CSVLoader;
+
+import java.awt.BorderLayout;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import javax.swing.JComboBox;
+import javax.swing.JRadioButton;
+import javax.swing.JTextField;
+
+import mvc_model.estruturais.Facade.MiningFacade;
+
+import javax.swing.border.LineBorder;
+
+public class PanelMineracao extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private List<Instances> data;
+	private JLabel nomeAtrSelecionado;
+	private JLabel tipoAtrSelecionado;
+	private JLabel nomeArquivoDados;
+	private JLabel numAtributos;
+	private JLabel numInstancias;
+	private JTable table;
+	private JScrollPane jScrollAttributes;
+	private JScrollPane jScrollOutputClassifier;
+	private JTable jTableAtributos;
+	private JTextArea outputClassifier;
+
+	private JButton iniciar;
+	private JButton parar;
+
+	@SuppressWarnings("rawtypes")
+	private JComboBox classificadores;
+	@SuppressWarnings("rawtypes")
+	private JComboBox jComboBoxAtributos;
+
+	JRadioButton jRadioUse;
+	JRadioButton jRadioCross;
+
+	private File file;
+	private JTextField folds;
+
+	/**
+	 * Create the panel.
+	 */
+
+	public void verificaAtributo(int linha) {
+		nomeAtrSelecionado.setText(data.get(data.size() - 1).attribute(linha)
+				.name());
+		String tipo = "";
+		if (data.get(data.size() - 1).attribute(linha).isNominal()) {
+			tipo = "Nominal";
+		} else if (data.get(data.size() - 1).attribute(linha).isNumeric()) {
+			tipo = "Numérico";
+		} else if (data.get(data.size() - 1).attribute(linha).isDate()) {
+			tipo = "Data";
+		}
+		tipoAtrSelecionado.setText(tipo);
+	}
+
+	@SuppressWarnings("serial")
+	public void atualizarAtributos() {
+		int i = 0;
+		DefaultTableModel modelo = new DefaultTableModel(null, new String[] {
+				"Nº", "", "Nome" }) {
+
+			@Override
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+				return canEdit[columnIndex];
+			}
+
+			@SuppressWarnings("rawtypes")
+			Class[] types = new Class[] { java.lang.Object.class,
+					java.lang.Boolean.class, java.lang.String.class };
+			boolean[] canEdit = new boolean[] { false, true, false };
+
+			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@Override
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
+		};
+		while (i < data.get(data.size() - 1).numAttributes()) {
+			modelo.addRow(new Object[] { i + 1, false,
+					data.get(data.size() - 1).attribute(i).name() });
+			i++;
+		}
+		jTableAtributos.setModel(modelo);
+		TableColumn col = jTableAtributos.getColumnModel().getColumn(0);
+		col.setPreferredWidth(50);
+
+		TableColumn col2 = jTableAtributos.getColumnModel().getColumn(1);
+		col2.setPreferredWidth(15);
+
+		TableColumn col3 = jTableAtributos.getColumnModel().getColumn(2);
+		col3.setPreferredWidth(250);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void atualizaInfoArquivo() {
+		nomeArquivoDados.setText(file.getName());
+		numAtributos.setText(String.valueOf(data.get(data.size() - 1)
+				.numAttributes()));
+		numInstancias.setText(String.valueOf(data.get(data.size() - 1)
+				.numInstances()));
+
+		DefaultComboBoxModel modelo = new DefaultComboBoxModel();
+
+		int num = data.get(data.size() - 1).numAttributes();
+
+		int i = 0;
+
+		while (i < num) {
+			Attribute at = data.get(data.size() - 1).attribute(i);
+			if (at.isNominal()) {
+				modelo.addElement("(Nom) " + at.name());
+			} else if (at.isNumeric()) {
+				modelo.addElement("(Num) " + at.name());
+			} else if (at.isDate()) {
+				modelo.addElement("(Date) " + at.name());
+			}
+			i++;
+		}
+		jComboBoxAtributos.setModel(modelo);
+		jComboBoxAtributos.setSelectedIndex(i - 1);
+
+	}
+
+	@SuppressWarnings({ "serial", "rawtypes", "unchecked" })
+	public PanelMineracao() {
+		setBackground(Color.WHITE);
+		setLayout(new BorderLayout(0, 0));
+		data = new ArrayList<Instances>();
+
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBorder(new LineBorder(new Color(0, 0, 0)));
+		tabbedPane.setAutoscrolls(true);
+		add(tabbedPane);
+		tabbedPane.setFont(new Font("Microsoft New Tai Lue", Font.BOLD, 16));
+
+		outputClassifier = new JTextArea();
+		
+		JPanel preprocessamento = new JPanel();
+		preprocessamento.setBorder(new LineBorder(new Color(0, 0, 0)));
+		preprocessamento.setBackground(Color.WHITE);
+		tabbedPane.addTab("Pré-Processamento", null, preprocessamento, null);
+		preprocessamento.setLayout(null);
+
+		table = new JTable();
+		table.setBounds(45, 190, 101, -46);
+		preprocessamento.add(table);
+
+		jScrollAttributes = new JScrollPane();
+		jScrollAttributes.setBorder(new LineBorder(new Color(130, 135, 144)));
+		jScrollAttributes.setBounds(328, 70, 258, 318);
+		preprocessamento.add(jScrollAttributes);
+
+
+		jTableAtributos = new JTable();
+
+		jTableAtributos.setModel(new javax.swing.table.DefaultTableModel(
+				new Object[][] {
+
+				}, new String[] { "Nº", "", "Nome " }) {
+			/**
+																																																																																	 * 
+																																																																																	 */
+
+			Class[] types = new Class[] { java.lang.Object.class,
+					java.lang.Boolean.class, java.lang.String.class };
+			boolean[] canEdit = new boolean[] { false, true, false };
+
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
+
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+				return canEdit[columnIndex];
+			}
+		});
+		TableColumn col = jTableAtributos.getColumnModel().getColumn(0);
+
+		TableColumn col2 = jTableAtributos.getColumnModel().getColumn(1);
+
+		TableColumn col3 = jTableAtributos.getColumnModel().getColumn(2);
+
+		jTableAtributos
+				.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+		jTableAtributos
+				.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+					public void mouseDragged(java.awt.event.MouseEvent evt) {
+						jTableAtributosMouseDragged(evt);
+					}
+				});
+		jTableAtributos.addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				jTableAtributosMouseClicked(evt);
+			}
+		});
+		jTableAtributos.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent evt) {
+				jTableAtributosKeyPressed(evt);
+			}
+		});
+
+		jScrollAttributes.setViewportView(jTableAtributos);
+
+		JPanel panel_2 = new JPanel();
+		panel_2.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panel_2.setBounds(10, 70, 243, 74);
+		preprocessamento.add(panel_2);
+		panel_2.setLayout(null);
+
+		JLabel lblNewLabel = new JLabel("Base de Dados");
+		lblNewLabel.setBounds(75, 5, 71, 14);
+		panel_2.add(lblNewLabel);
+
+		JLabel lblNewLabel_1 = new JLabel("Arquivo:");
+		lblNewLabel_1.setBounds(10, 30, 41, 14);
+		panel_2.add(lblNewLabel_1);
+
+		nomeArquivoDados = new JLabel("...");
+		nomeArquivoDados.setBounds(61, 30, 140, 14);
+		panel_2.add(nomeArquivoDados);
+
+		JLabel lblInstncias = new JLabel("Instâncias:");
+		lblInstncias.setBounds(9, 55, 53, 14);
+		panel_2.add(lblInstncias);
+
+		numInstancias = new JLabel("...");
+		numInstancias.setBounds(71, 55, 54, 14);
+		panel_2.add(numInstancias);
+
+		JLabel lblAtributos = new JLabel("Atributos:");
+		lblAtributos.setBounds(134, 55, 48, 14);
+		panel_2.add(lblAtributos);
+
+		numAtributos = new JLabel("...");
+		numAtributos.setBounds(192, 55, 41, 14);
+		panel_2.add(numAtributos);
+
+		JPanel panel_3 = new JPanel();
+		panel_3.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panel_3.setBounds(10, 166, 243, 74);
+		preprocessamento.add(panel_3);
+		panel_3.setLayout(null);
+
+		JLabel lblAtributoSelecionado = new JLabel("Atributo Selecionado");
+		lblAtributoSelecionado.setBounds(75, 2, 127, 14);
+		panel_3.add(lblAtributoSelecionado);
+
+		JLabel lblNome = new JLabel("Nome");
+		lblNome.setBounds(10, 27, 34, 14);
+		panel_3.add(lblNome);
+
+		nomeAtrSelecionado = new JLabel("...");
+		nomeAtrSelecionado.setBounds(56, 27, 89, 14);
+		panel_3.add(nomeAtrSelecionado);
+
+		JLabel lblTipo = new JLabel("Tipo");
+		lblTipo.setBounds(10, 52, 34, 14);
+		panel_3.add(lblTipo);
+
+		tipoAtrSelecionado = new JLabel("...");
+		tipoAtrSelecionado.setBounds(56, 52, 89, 14);
+		panel_3.add(tipoAtrSelecionado);
+
+		JPanel panel_4 = new JPanel();
+		panel_4.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panel_4.setBackground(Color.WHITE);
+		panel_4.setBounds(10, 11, 607, 48);
+		preprocessamento.add(panel_4);
+		panel_4.setLayout(null);
+
+		JButton btnNewButton = new JButton("Abrir Arquivo");
+		btnNewButton.setBounds(23, 11, 95, 23);
+		panel_4.add(btnNewButton);
+
+		JButton btnNewButton_1 = new JButton("Salvar Base");
+		btnNewButton_1.setBounds(289, 11, 89, 23);
+		panel_4.add(btnNewButton_1);
+
+		JButton btnNewButton_2 = new JButton("Desfazer");
+		btnNewButton_2.setBounds(150, 11, 89, 23);
+		panel_4.add(btnNewButton_2);
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				jButtonAbrirActionPerformed(arg0);
+			}
+		});
+
+		JPanel mineracao = new JPanel();
+		mineracao.setBackground(Color.WHITE);
+		mineracao.setBorder(new LineBorder(new Color(0, 0, 0)));
+		mineracao.setEnabled(false);
+		tabbedPane.addTab("Mineração de Dados", null, mineracao, null);
+		mineracao.setLayout(null);
+
+		JLabel lblNewLabel_2 = new JLabel("Seleciona Algoritmo:");
+		lblNewLabel_2.setBounds(10, 11, 106, 14);
+		mineracao.add(lblNewLabel_2);
+
+		classificadores = new JComboBox();
+		classificadores.setBounds(126, 8, 235, 20);
+
+		classificadores.setModel(new javax.swing.DefaultComboBoxModel(
+				new String[] { "Selecione o classificador",
+						"FUNCTION - MultilayerPerceptron", "TREE J48",
+						"BAYES Naive Bayes", "FUNCTION SMO" }));
+		classificadores.setEnabled(false);
+		classificadores.addItemListener(new java.awt.event.ItemListener() {
+			public void itemStateChanged(java.awt.event.ItemEvent evt) {
+				classificadoresItemStateChanged(evt);
+			}
+		});
+		mineracao.add(classificadores);
+		
+		
+		jScrollOutputClassifier = new JScrollPane();
+		jScrollOutputClassifier.setBorder(new LineBorder(new Color(130, 135,144)));
+		jScrollOutputClassifier.setBounds(208, 46, 396, 342);
+		mineracao.add(jScrollOutputClassifier);
+
+		jScrollOutputClassifier.setViewportView(outputClassifier);
+		
+		iniciar = new JButton("Iniciar");
+		iniciar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				iniciarActionPerformed(arg0);
+			}
+		});
+		iniciar.setBounds(10, 175, 89, 23);
+		mineracao.add(iniciar);
+
+		parar = new JButton("Parar");
+		parar.setBounds(109, 175, 89, 23);
+		mineracao.add(parar);
+
+		jRadioUse = new JRadioButton("Use Training Set");
+		jRadioUse.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				jRadioUseActionPerformed(e);
+			}
+		});
+		jRadioUse.setBounds(28, 49, 109, 23);
+		mineracao.add(jRadioUse);
+
+		jRadioCross = new JRadioButton("Cross Validation:");
+		jRadioCross.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				jRadioCrossActionPerformed(e);
+			}
+		});
+		jRadioCross.setBounds(28, 80, 109, 23);
+		mineracao.add(jRadioCross);
+
+		jComboBoxAtributos = new JComboBox();
+		jComboBoxAtributos.setBounds(10, 144, 188, 20);
+		mineracao.add(jComboBoxAtributos);
+
+		JLabel lblFolds = new JLabel("Folds");
+		lblFolds.setBounds(53, 110, 46, 14);
+		mineracao.add(lblFolds);
+
+		folds = new JTextField();
+		folds.setEnabled(false);
+		folds.setText("10");
+		folds.setBounds(109, 107, 46, 20);
+		mineracao.add(folds);
+		folds.setColumns(10);
+
+		col.setPreferredWidth(50);
+		col2.setPreferredWidth(15);
+		col3.setPreferredWidth(250);
+
+	}
+
+	private void jButtonAbrirActionPerformed(java.awt.event.ActionEvent evt) {
+		JFileChooser fc = new JFileChooser();
+
+		FileFilter ff1 = new FileNameExtensionFilter(
+				"Arff data files (*.arff)", "arff");
+		FileFilter ff2 = new FileNameExtensionFilter(
+				"Separado por virgulas (*.csv)", "csv");
+
+		fc.addChoosableFileFilter(ff1);
+		fc.addChoosableFileFilter(ff2);
+
+		fc.setAcceptAllFileFilterUsed(false);
+
+		int returnVal = fc.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			file = fc.getSelectedFile();
+			classificadores.setEnabled(true);
+			String formato[] = file.getName().split("\\.");
+			if (formato[1].equals("csv")) {
+				CSVLoader cv = new CSVLoader();
+				try {
+					cv.setFile(file);
+					Instances intancias;
+					intancias = new Instances(cv.getDataSet());
+					data.add(intancias);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+			} else if (formato[1].equals("arff")) {
+				try {
+					data.add(new Instances(new BufferedReader(new FileReader(
+							file))));
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			atualizarAtributos();
+			atualizaInfoArquivo();
+		} else {
+			System.out.println("Erro ao abrir arquivo");
+		}
+
+	}
+
+	private void jTableAtributosMouseClicked(java.awt.event.MouseEvent evt) {
+		int linha = jTableAtributos.getSelectedRow();
+		verificaAtributo(linha);
+	}
+
+	private void jTableAtributosKeyPressed(java.awt.event.KeyEvent evt) {
+		int linha = jTableAtributos.getSelectedRow();
+		verificaAtributo(linha);
+	}
+
+	private void jTableAtributosMouseDragged(java.awt.event.MouseEvent evt) {
+		int linha = jTableAtributos.getSelectedRow();
+		verificaAtributo(linha);
+	}
+
+	private void classificadoresItemStateChanged(java.awt.event.ItemEvent evt) {
+		if (classificadores.getSelectedIndex() != 0) {
+			iniciar.setEnabled(true);
+			parar.setEnabled(false);
+		}
+	}
+
+	private void iniciarActionPerformed(java.awt.event.ActionEvent evt) {
+		int selecionado = classificadores.getSelectedIndex();
+		System.gc();
+		if (selecionado != 0) {
+			Instances base = data.get(data.size() - 1);
+			int classe = jComboBoxAtributos.getSelectedIndex();
+			try {
+				int cross = 0;
+				if (jRadioCross.isSelected()) {
+					cross = Integer.valueOf(folds.getText());
+				} else if (jRadioUse.isSelected()) {
+					cross = 0;
+				}
+				MiningFacade mining = new MiningFacade();
+				if (selecionado == 1) {
+					mining.MiningOptions(base, classe, cross,
+							new MultilayerPerceptron());
+
+					// atualizaExecucoes(new
+					// OutputClassifier("Function MultilayerPerceptron",
+					// classificador.getOutput()));
+				} else if (selecionado == 2) {
+					mining.MiningOptions(base, classe, cross, new J48());
+
+					// atualizaExecucoes(new OutputClassifier("Tree J48",
+					// classificador.getOutput()));
+				} else if (selecionado == 3) {
+					mining.MiningOptions(base, classe, cross, new NaiveBayes());
+					// atualizaExecucoes(new
+					// OutputClassifier("BAYES - Naive Bayes",
+					// classificador.getOutput()));
+				} else if (selecionado == 4) {
+					mining.MiningOptions(base, classe, cross, new SMO());
+					// atualizaExecucoes(new OutputClassifier("Function - SMO",
+					// classificador.getOutput()));
+				}
+
+				mining.runDataMining(outputClassifier);
+				// threadClassificador = new Thread(classificador);
+				// threadClassificador.start();
+			} catch (Exception ex) {
+
+			}
+
+		}
+	}
+
+	private void jRadioUseActionPerformed(java.awt.event.ActionEvent evt) {
+		jRadioCross.setSelected(false);
+		folds.setEnabled(false);
+	}
+
+	private void jRadioCrossActionPerformed(java.awt.event.ActionEvent evt) {
+		jRadioUse.setSelected(false);
+		folds.setEnabled(true);
+	}
+}

@@ -1,0 +1,8 @@
+package mvc_model.criacionais.AbstractFactory;
+
+import org.opencv.core.Mat;
+
+public interface AbstractFiltro1Canal {
+	public void filtrarImagem1Canal(Mat imagem, int filtro);
+	public Mat getResult();
+}

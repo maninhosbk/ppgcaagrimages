@@ -1,0 +1,23 @@
+package mvc_model.criacionais.AbstractFactory;
+
+import org.opencv.core.Mat;
+
+public class ConcreteFactoryCor implements AbstractFactoryFiltro{
+
+	@Override
+	public AbstractFiltro1Canal AplicarFiltro1Canal(Mat imagem, int filtro) {
+		// TODO Auto-generated method stub
+		AbstractFiltro1Canal p = new FiltroCor1Canal();
+		p.filtrarImagem1Canal(imagem, filtro);
+		return p;
+	}
+
+	@Override
+	public AbstractFiltro3Canal AplicarFiltro3Canal(Mat imagem, int filtro) {
+		// TODO Auto-generated method stub
+		AbstractFiltro3Canal p = new FiltroCor3Canal();
+		p.filtrarImagem3Canal(imagem, filtro);
+		return p;
+	}
+	
+}

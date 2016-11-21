@@ -1,0 +1,42 @@
+package mvc_model.estruturais.Facade;
+
+import java.io.File;
+
+import weka.classifiers.Classifier;
+import weka.core.Instances;
+
+public class MiningFacade {
+	MiningInput input;
+	MiningValidation validation;
+	MiningAlgorithm algorithm;
+	
+	public void MiningOptions(File arquivo, int validacao, Classifier classificador){
+		input = new MiningInput();
+		input.configuraArquivo(arquivo);
+		 String formato[] = arquivo.getName().split("\\.");
+		input.configuraExtensao(formato[1]);
+		
+		validation = new MiningValidation();
+		validation.configuraTipoValidacao(validacao);
+		
+		algorithm = new MiningAlgorithm();
+		algorithm.configuraClassificador(classificador);
+	}
+	
+	public void readInputData(){
+		input.loadArquivo();
+	}
+	
+	public void runAlgorithm(Instances data){
+		algorithm.executaAlgoritmo(data);
+	}
+	
+	public void runValidacao(Classifier classifier, Instances data){
+		try {
+			validation.executaValidacao(classifier, data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}

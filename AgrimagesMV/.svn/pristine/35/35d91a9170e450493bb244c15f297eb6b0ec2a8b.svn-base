@@ -1,0 +1,18 @@
+package mvc_model.comportamentais.Command;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class InvokerCorrecao {
+	private List<CorrecaoCommand> correcoes = new ArrayList<>();
+
+	public InvokerCorrecao() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+	
+	public void correcao(CorrecaoCommand correcao){
+		correcoes.add(correcao);
+		correcao.executaCorrecao();
+	}
+}

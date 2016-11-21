@@ -1,0 +1,33 @@
+package agrimages.Correcoes;
+
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
+public class FiltroCor3Canal implements AbstractFiltro3Canal{
+	private Mat src;
+	private Mat dst;
+	
+	@Override
+	public Mat getResult() {
+		// TODO Auto-generated method stub
+		return dst;
+	}
+	@Override
+	public void filtrarImagem3Canal(Mat imagem, int filtro) {
+		// TODO Auto-generated method stub
+		this.src = imagem;
+        this.dst = new Mat(src.height(),src.width(),src.type());
+        switch(filtro){
+        	case 1:{
+        		Imgproc.cvtColor(this.src, this.dst , Imgproc.COLOR_BGR2HSV);
+        	}break;
+        	case 2:{
+        		Imgproc.cvtColor(this.src, this.dst , Imgproc.COLOR_BGR2RGB);
+        	}break;
+        	case 3:{
+        		Imgproc.cvtColor(this.src, this.dst , Imgproc.COLOR_HSV2RGB);
+        	}break;
+        }
+	}
+
+}

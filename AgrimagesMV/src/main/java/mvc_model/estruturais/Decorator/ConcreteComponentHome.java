@@ -1,0 +1,62 @@
+package mvc_model.estruturais.Decorator;
+
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
+
+import mvc_controller.Main;
+
+
+public class ConcreteComponentHome extends ComponentPanel{
+	
+	/**
+	 * 
+	 */
+	
+	private static final long serialVersionUID = 1L;
+
+	public ConcreteComponentHome() {
+		// TODO Auto-generated constructor stub
+		JButton homeHeader = new JButton();
+		homeHeader.setName("home");
+		
+		homeHeader.setIcon(new ImageIcon(Main.class.getResource("/Imagens/MenuMini/Sem Borda/btnHomeMini.png")));
+		homeHeader.setBorder(null);
+		homeHeader.setContentAreaFilled(false);
+		homeHeader.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		homeHeader.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/MenuMini/Borda/btnHomeMini.png")));
+		homeHeader.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/MenuMini/Sem Borda/btnHomeMini.png")));
+		
+		JButton configHeader = new JButton();
+		configHeader.setName("config");
+		
+		configHeader.setIcon(new ImageIcon(Main.class.getResource("/Imagens/MenuMini/Sem Borda/btnConfigMini.png")));
+		configHeader.setBorder(null);
+		configHeader.setContentAreaFilled(false);
+		configHeader.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		configHeader.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/MenuMini/Borda/btnConfigMini.png")));
+		configHeader.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/MenuMini/Sem Borda/btnConfigMini.png")));
+		
+		JPanel home = new JPanel();
+		home.setBorder(new LineBorder(Color.black));
+		home.setBackground(new Color(255, 255, 255));
+		home.setLayout(new FlowLayout(FlowLayout.LEADING,35,20));
+		
+		homeHeader.addActionListener(new ActionListener() {
+	       	public void actionPerformed(ActionEvent e) {
+	       		setCompVisible("home");
+	       	}
+       });
+		
+		getHeader().add(homeHeader);
+		getHeader().add(configHeader);
+		getCentro().add(home, "home");
+		
+	}
+}

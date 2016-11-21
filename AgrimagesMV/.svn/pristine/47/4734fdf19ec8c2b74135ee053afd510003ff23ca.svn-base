@@ -1,0 +1,22 @@
+package mvc_model.estruturais.Facade;
+
+import weka.classifiers.Classifier;
+import weka.core.Instances;
+
+public class MiningAlgorithm {
+	Classifier classificador;
+	
+	public void configuraClassificador(Classifier classificador){
+		this.classificador = classificador;
+	}
+	
+	
+	public void executaAlgoritmo(Instances data){
+		try {
+			classificador.buildClassifier(data);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}

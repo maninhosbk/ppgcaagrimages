@@ -1,0 +1,135 @@
+package mvc_model.estruturais.Decorator;
+
+import java.awt.Component;
+import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EmptyBorder;
+
+import org.opencv.core.Core;
+
+public class MainCliente extends JFrame  implements ActionListener{
+
+	/**
+	 * 
+	 */
+	
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private ComponentPanel simples;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Windows".equals(info.getName())) {
+                    try {
+						javax.swing.UIManager.setLookAndFeel(info.getClassName());
+					} catch (ClassNotFoundException 
+							| InstantiationException
+							| IllegalAccessException
+							| UnsupportedLookAndFeelException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+                    break;
+                }
+            }
+         
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					MainCliente frame = new MainCliente();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	@Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        //Graphics2D g2d = (Graphics2D) g;
+        //g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        
+        simples.header.setBounds(0, 0, getWidth(), 70);
+        simples.centro.setBounds(0, 70, getWidth(), getHeight()-110);
+        simples.setBounds(0, 0, this.getWidth(), this.getHeight());
+        
+        int w = simples.centro.getWidth();
+        int h = simples.centro.getHeight();
+        
+        int aux = simples.header.getComponentCount();
+        
+        for(Component c : simples.header.getComponents()){
+            c.setLocation(simples.header.getWidth()-(55*aux)-20,10);
+            simples.header.setLayout(null);
+        	aux--;
+        }
+        //System.out.println(w);
+        //System.out.println(h);
+        for(Component c : simples.centro.getComponents()){
+            if (!(c instanceof JLabel)){
+                c.setSize(w-(w/10),h-(h/10));
+                c.setLocation((w/10)/2,(h/10)/2);
+                simples.centro.setLayout(null);
+            }
+        }
+        
+        revalidate();
+        repaint();
+        g.dispose();
+    }
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		repaint();
+	}
+	
+	/**
+	 * Create the frame.
+	 */
+	public MainCliente() {
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		
+		simples = new ConcreteComponentHome();
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+		setSize(640, 480);
+		contentPane = new JPanel();
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		simples.setBounds(5, 5, 424, 251);
+		
+		new DecoratorAeronave(simples);
+		new DecoratorAreaEstudo(simples);
+		new DecoratorOperador(simples);
+		//new DecoratorCamera(simples);
+		//new DecoratorExperimento(simples);
+		
+		//new DecoratorFabricante(simples);
+		//new DecoratorVoo(simples);
+		new DecoratorRecorte(simples);
+		new DecoratorCorrecao(simples);
+		//new DecoratorMineracao(simples);
+		
+		contentPane.add(simples);
+		
+		setLocationRelativeTo(null);
+	}
+}

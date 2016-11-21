@@ -1,0 +1,99 @@
+package mvc_view;
+
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JCheckBox;
+
+public class ConfigDecorator extends JDialog {
+
+	private final JPanel contentPanel = new JPanel();
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		try {
+			ConfigDecorator dialog = new ConfigDecorator();
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setVisible(true);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Create the dialog.
+	 */
+	public ConfigDecorator() {
+		setBounds(100, 100, 450, 300);
+		getContentPane().setLayout(new BorderLayout());
+		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
+		getContentPane().add(contentPanel, BorderLayout.CENTER);
+		contentPanel.setLayout(null);
+
+		JPanel panel = new JPanel();
+		panel.setBounds(0, 0, 434, 228);
+		contentPanel.add(panel);
+		panel.setLayout(null);
+
+		JCheckBox aeronave = new JCheckBox("Aeronave");
+		aeronave.setBounds(24, 26, 97, 23);
+		panel.add(aeronave);
+
+		JCheckBox areaEstudo = new JCheckBox("Area de Estudo");
+		areaEstudo.setBounds(24, 72, 97, 23);
+		panel.add(areaEstudo);
+
+		JCheckBox camera = new JCheckBox("Câmera");
+		camera.setBounds(24, 115, 97, 23);
+		panel.add(camera);
+
+		JCheckBox correcao = new JCheckBox("Correção");
+		correcao.setBounds(137, 26, 97, 23);
+		panel.add(correcao);
+
+		JCheckBox experimento = new JCheckBox("Experimento");
+		experimento.setBounds(137, 72, 97, 23);
+		panel.add(experimento);
+
+		JCheckBox fabricante = new JCheckBox("Fabricante");
+		fabricante.setBounds(137, 115, 97, 23);
+		panel.add(fabricante);
+
+		JCheckBox mineracao = new JCheckBox("Mineração");
+		mineracao.setBounds(263, 26, 97, 23);
+		panel.add(mineracao);
+
+		JCheckBox operador = new JCheckBox("Operador");
+		operador.setBounds(263, 72, 97, 23);
+		panel.add(operador);
+
+		JCheckBox recorte = new JCheckBox("Recorte");
+		recorte.setBounds(263, 115, 97, 23);
+		panel.add(recorte);
+
+		JCheckBox voo = new JCheckBox("Voo");
+		voo.setBounds(24, 158, 97, 23);
+		panel.add(voo);
+
+
+		JPanel buttonPane = new JPanel();
+		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		getContentPane().add(buttonPane, BorderLayout.SOUTH);
+
+		JButton okButton = new JButton("OK");
+		okButton.setActionCommand("OK");
+		buttonPane.add(okButton);
+		getRootPane().setDefaultButton(okButton);
+
+		JButton cancelButton = new JButton("Cancel");
+		cancelButton.setActionCommand("Cancel");
+		buttonPane.add(cancelButton);
+
+	}
+}

@@ -1,0 +1,58 @@
+package agrimages.PadraoDecorator;
+
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
+
+public class DecoratorCamera extends Decorator{
+	/**
+	 * 
+	 */
+	
+	private static final long serialVersionUID = 1L;
+
+	public DecoratorCamera(ComponentPanel main) {
+		super(main);
+		// TODO Auto-generated constructor stub
+		JPanel panel = new JPanel();
+		panel.setBorder(new LineBorder(Color.black));
+		
+		JButton botaoMenuMini = new JButton();
+		botaoMenuMini.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/MenuMini/Sem Borda/btnCameraMini.png")));
+		botaoMenuMini.setBorder(null);
+		botaoMenuMini.setContentAreaFilled(false);
+		botaoMenuMini.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		botaoMenuMini.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/MenuMini/Borda/btnCameraMini.png")));
+		botaoMenuMini.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/MenuMini/Borda/btnCameraMini.png")));
+		
+		main.header.add(botaoMenuMini);
+		main.centro.add(panel);
+		
+		JButton botaoMenu = new JButton();
+		botaoMenu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/Sem Borda/btnCamera.png")));
+		botaoMenu.setBorder(null);
+		botaoMenu.setContentAreaFilled(false);
+		botaoMenu.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+		botaoMenu.setRolloverIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/Borda/btnCamera.png")));
+		botaoMenu.setSelectedIcon(new javax.swing.ImageIcon(getClass().getResource("/Imagens/Borda/btnCamera.png")));
+		botaoMenu.addActionListener(new ActionListener() {
+	    	   public void actionPerformed(ActionEvent e) {
+	    		   main.setCompVisible(panel);
+	    	   }
+	       });
+		
+		JPanel aux = (JPanel) main.centro.getComponent(0);
+		aux.add(botaoMenu);
+		
+		botaoMenuMini.addActionListener(new ActionListener() {
+	    	   public void actionPerformed(ActionEvent e) {
+	    		   main.setCompVisible(panel);
+	    	   }
+	       });
+		botaoMenuMini.setVisible(true);	
+	}
+}

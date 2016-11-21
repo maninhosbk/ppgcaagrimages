@@ -1,0 +1,100 @@
+package agrimages.PadraoFactoryMethod;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class RecorteDadosImagem {
+	private List<Double> R = new ArrayList<>();
+    private List<Double> G = new ArrayList<>();
+    private List<Double> B = new ArrayList<>();
+    private List<Double> H = new ArrayList<>();
+    private List<Double> S = new ArrayList<>();
+    private List<Double> I = new ArrayList<>();
+    private List<String> Classe = new ArrayList<>();
+    private List<String> classes = new ArrayList<>();
+    private int size = 0;
+
+    public List<String> getClasses() {
+        return classes;
+    }
+    public void setSize(int size) {
+        this.size = size;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public List<Double> getR() {
+        return R;
+    }
+
+    public List<Double> getG() {
+        return G;
+    }
+
+    public List<Double> getB() {
+        return B;
+    }
+
+    public List<Double> getH() {
+        return H;
+    }
+
+    public List<Double> getS() {
+        return S;
+    }
+
+    public List<Double> getI() {
+        return I;
+    }
+
+    public List<String> getClasse() {
+        return Classe;
+    }
+    
+    
+    public void setR(List<Double> r) {
+		R = r;
+	}
+
+	public void setG(List<Double> g) {
+		G = g;
+	}
+
+	public void setB(List<Double> b) {
+		B = b;
+	}
+
+	public void setH(List<Double> h) {
+		H = h;
+	}
+
+	public void setS(List<Double> s) {
+		S = s;
+	}
+
+	public void setI(List<Double> i) {
+		I = i;
+	}
+
+	public void setClasse(List<String> classe) {
+		Classe = classe;
+	}
+
+	public void setClasses(List<String> classes) {
+		this.classes = classes;
+	}
+
+	public void removeAllLists(){
+		this.setR(new ArrayList<>());
+		this.setG(new ArrayList<>());
+		this.setB(new ArrayList<>());
+		this.setH(new ArrayList<>());
+		this.setS(new ArrayList<>());
+		this.setI(new ArrayList<>());
+		this.setClasse(new ArrayList<>());
+		this.setClasses(new ArrayList<>());
+        this.size = 0;
+    }
+}

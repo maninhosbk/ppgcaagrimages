@@ -1,0 +1,68 @@
+package mvc_model.estruturais.Decorator;
+
+import java.awt.Color;
+import java.awt.Component;
+
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.LineBorder;
+
+public abstract class ComponentPanel extends JPanel{
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	JPanel header;
+	JPanel centro;
+	JLabel lblFundo;
+	
+	
+	public ComponentPanel(){
+		
+		header = new JPanel();
+		centro = new JPanel();
+		lblFundo = new JLabel();
+		
+		header.setBorder(new LineBorder(Color.black));
+		add(header);
+		add(centro);
+		add(lblFundo);
+		
+		header.setBounds(0, 0, this.getWidth(), 70);
+		header.setBackground(new Color(255,255,255,200));
+		//header.setOpaque(false);
+		
+		centro.setBounds(0, 70, this.getWidth(), this.getHeight()-70);
+		centro.setBackground(new Color(255,255,255,170));
+		//centro.setOpaque(false);
+		
+		lblFundo.setIcon(new ImageIcon("C:\\Users\\david\\Documents\\workspace\\AGRImages\\src\\Imagens\\Fundo2.jpg"));
+		lblFundo.setBounds(0, 0, 640, 481);
+		lblFundo.setOpaque(true);
+		lblFundo.setVisible(true);
+		
+		addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+            	lblFundo.setSize(getSize());
+            }
+        });
+		
+		this.setLayout(null);
+		
+		
+	}
+
+	public void setCompVisible(Component c){
+		for(Component comp : centro.getComponents()){
+			if(comp.equals(c)){
+				comp.setVisible(true);
+			}else{
+				comp.setVisible(false);
+			}
+		}
+	}
+	
+}

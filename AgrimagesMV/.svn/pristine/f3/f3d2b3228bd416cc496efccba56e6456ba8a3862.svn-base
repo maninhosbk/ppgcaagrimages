@@ -1,0 +1,137 @@
+package mvc_model.criacionais.FactoryMethod;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import mvc_model.criacionais.AbstractFactory.FactoryMaker;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
+import org.opencv.core.Point;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
+
+
+
+public class RecorteIrregular extends Recorte{
+	private Mat novaImagem;
+	private Mat mascara;
+	
+	private int maxX;
+	private int maxY;
+	private int minX;
+	private int minY;
+	
+    private List<Point> pontos;
+	
+    public RecorteIrregular(Mat imagem, ArrayList<Point> pontos) {
+		// TODO Auto-generated constructor stub
+		this.src = imagem;
+		this.dst = new Mat();
+		this.pontos = pontos;
+		this.dados = new RecorteDadosImagem();
+	}
+    
+    public void addPontos(int auxX, int auxY,int w,int h) {
+        int x = ((auxX * src.width()) / w);
+        int y = ((auxY * src.height()) / h);
+        if(pontos.isEmpty()){
+            this.minX = x;
+            this.minY = y;
+            this.maxX = x;
+            this.maxY = y;
+        }else{
+            if(x > this.maxX){
+                this.maxX = x;
+            }else if(x < this.minX){
+                this.minX = x;
+            }
+
+            if(y > this.maxY){
+                this.maxY = y;
+            }else if(y < this.minY){
+                this.minY = y;
+            }
+        }
+        this.pontos.add(new Point(x, y));
+    }
+    
+
+	@Override
+	public void recortar() {
+		Mat mask = Mat.zeros(src.height(), src.width(), src.type());
+        mascara = Mat.zeros(src.height(), src.width(), CvType.CV_8UC1);
+        
+        List<MatOfPoint> pts = new ArrayList<MatOfPoint>();
+        MatOfPoint mop = new MatOfPoint();
+        Point[] array = new Point[pontos.size()];
+        int i = 0;
+        while (i < pontos.size()) {
+            array[i] = pontos.get(i);
+            i++;
+        }
+        mop.fromArray(array);
+        pts.add(mop);
+        Scalar color = new Scalar(255, 255, 255);
+        
+        Core.fillPoly(mask, pts, color);
+        Core.fillPoly(mascara, pts, new Scalar(255));
+        
+        dst = new Mat(src.height(), src.width(), src.type());
+        Core.bitwise_and(src, mask, dst);
+	}
+	
+	@Override
+	public void salvarDadosRecorte(String classe){
+		// TODO Auto-generated method stub
+		Size sizeA = dst.size();
+		
+		FactoryMaker fabrica = new FactoryMaker();
+		
+		Mat RGB = fabrica.getFactory("cor", 2, dst, 0, 0);
+        Mat HSV = fabrica.getFactory("cor", 1, dst, 0, 0);
+		
+        for (int i = 0; i < sizeA.height; i++) {
+            for (int j = 0; j < sizeA.width; j++) {
+                
+                double[] mask = mascara.get(i, j);
+                
+                if (mask[0] == 255.0) {
+                	double[] dataRGB = RGB.get(i, j);
+                    double[] dataHSV = HSV.get(i, j);
+                    
+                    dados.getR().add(dataRGB[0]);
+                    dados.getG().add(dataRGB[1]);
+                    dados.getB().add(dataRGB[2]);
+                    dados.getH().add(dataHSV[0]);
+                    dados.getS().add(dataHSV[1]);
+                    dados.getI().add(dataHSV[2]);
+                    dados.getClasse().add(classe);
+                    dados.setSize(dados.getSize() + 1);
+                }
+            }
+        }
+	}
+	@Override
+	public void salvarImagem(String caminho){
+		// TODO Auto-generated method stub
+				int width = maxX - minX;
+		        int height = maxY - minY;
+		        
+		        novaImagem = new Mat(height, width, src.type());
+		        int alt = 0, larg;
+		        for(int k = minY; k < maxY; k++){
+		            larg = 0;
+		            for(int j = minX; j < maxX; j++){
+		            	novaImagem.put(alt, larg, dst.get(k, j));
+		                larg++;        
+		            }
+		            alt++;
+		        }
+				Highgui.imwrite(caminho, novaImagem);
+	}
+	
+}

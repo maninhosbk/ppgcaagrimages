@@ -1,0 +1,108 @@
+package agrimages.Correcoes;
+
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
+
+public class FiltroRuido1Canal implements AbstractFiltro1Canal{
+	public Mat src;
+	public Mat dst;
+	
+	@Override
+	public Mat getResult() {
+		// TODO Auto-generated method stub
+		return dst;
+	}
+	@Override
+	public void filtrarImagem1Canal(Mat imagem, int filtro) {
+		// TODO Auto-generated method stub
+				src = imagem;
+				dst = new Mat(src.height(),src.width(),CvType.CV_8UC1);
+				
+				switch(filtro){
+					//threshold OTSU
+					case 1:{
+						Imgproc.threshold(src, dst, 100, 255, Imgproc.THRESH_OTSU);
+					}break;
+					case 2:{
+						Imgproc.threshold(src, dst, 124, 255, Imgproc.THRESH_OTSU);
+					}break;
+					case 3:{
+						Imgproc.threshold(src, dst, 150, 255, Imgproc.THRESH_OTSU);
+					}break;
+					case 4:{
+						Imgproc.threshold(src, dst, 175, 255, Imgproc.THRESH_OTSU);
+					}break;
+					case 5:{
+						Imgproc.threshold(src, dst, 200, 255, Imgproc.THRESH_OTSU);
+					}break;
+					
+					//Threshold Binario
+					case 6:{
+						Imgproc.threshold(src, dst, 100, 255, Imgproc.THRESH_BINARY);
+					}break;
+					case 7:{
+						Imgproc.threshold(src, dst, 124, 255, Imgproc.THRESH_BINARY);
+					}break;
+					case 8:{
+						Imgproc.threshold(src, dst, 150, 255, Imgproc.THRESH_BINARY);
+					}break;
+					case 9:{
+						Imgproc.threshold(src, dst, 175, 255, Imgproc.THRESH_BINARY);
+					}break;
+					case 10:{
+						Imgproc.threshold(src, dst, 200, 255, Imgproc.THRESH_BINARY);
+					}break;
+					
+					//Gaussiano
+					case 11:{
+						Imgproc.GaussianBlur(src, dst, new Size(3,3), 0.0);
+					}break;
+					case 12:{
+						Imgproc.GaussianBlur(src, dst, new Size(5,5), 0.0);
+					}break;
+					case 13:{
+						Imgproc.GaussianBlur(src, dst, new Size(7,7), 0.0);
+					}break;
+					case 14:{
+						Imgproc.GaussianBlur(src, dst, new Size(9,9), 0.0);
+					}break;
+					case 15:{
+						Imgproc.GaussianBlur(src, dst, new Size(11,11), 0.0);
+					}break;
+					
+					//MedianBlur
+					case 16:{
+						Imgproc.medianBlur(src, dst, 3);
+					}break;
+					
+					case 17:{
+						Imgproc.medianBlur(src, dst, 5);
+					}break;
+					
+					case 18:{
+						Imgproc.medianBlur(src, dst, 7);
+					}break;
+					case 19:{
+						Imgproc.medianBlur(src, dst, 9);
+					}break;
+					case 20:{
+						Imgproc.medianBlur(src, dst, 11);
+					}break;
+					
+					//filtro Sobel
+					case 21:{
+						Imgproc.Sobel(src, dst,CvType.CV_16S, 1, 0, 3, 1, 0);
+					}break;
+					case 22:{
+						Imgproc.Sobel(src, dst,CvType.CV_16S, 0, 1, 3, 1, 0);
+					}break;
+					
+					default:
+						break;
+					
+				}
+	}
+	
+}

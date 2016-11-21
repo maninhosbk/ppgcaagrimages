@@ -1,0 +1,40 @@
+package agrimages.PadraoCommand;
+
+import java.io.File;
+
+public class Imagem {
+	private File src;
+	private File dst;
+	private String parametros;
+	
+
+	public Imagem(File imagem, String parametros) {
+		super();
+		this.src = imagem;
+		this.dst = src;
+		this.parametros = parametros;
+	}
+	
+	
+	
+	public void correcaoRadiometrica(){
+		//codigo correção radiometrica dst
+		
+	}
+	public void correcaoGeometrica(){
+		//codigo correção geométrica dst
+		
+	}
+	
+	public void correcaoAtmosferica(){
+		//codigo correção Atmosférica dst
+	}
+	
+	public File getDst(){
+		return this.dst;
+	}
+	
+	public String getParametros(){
+		return this.parametros;
+	}
+}

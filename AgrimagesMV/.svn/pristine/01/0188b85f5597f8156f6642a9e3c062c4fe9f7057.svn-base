@@ -1,0 +1,15 @@
+package agrimages.PadraoAbstractFactory;
+
+public class FactoryMaker {
+	private AbstractFactoryFiltro filtro = null;
+	
+	public AbstractFactoryFiltro getFactory(String option){
+		if(option.equals("cor")){
+			filtro = new ConcreteFactory1Canal();
+		}else if(option.equals("ruido")){
+			
+		}
+		
+		return filtro;
+	}
+}

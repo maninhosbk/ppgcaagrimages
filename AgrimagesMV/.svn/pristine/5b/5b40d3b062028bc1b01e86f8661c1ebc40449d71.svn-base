@@ -1,0 +1,131 @@
+package mvc_view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+
+import mvc_model.estruturais.Facade.MiningFacade;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.functions.SMO;
+import weka.classifiers.trees.J48;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.converters.CSVLoader;
+
+import javax.swing.ListSelectionModel;
+
+public class PanelAeronave extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private List<Instances> data;
+	private JTable table;
+		/**
+	 * Create the panel.
+	 */
+
+	
+	@SuppressWarnings({ "serial", "rawtypes", "unchecked" })
+	public PanelAeronave() {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		
+		JPanel panel = new JPanel();
+		panel.setBounds(0, 0, 634, 438);
+		add(panel);
+		panel.setLayout(null);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBorder(new LineBorder(new Color(130, 135, 144)));
+		scrollPane.setBounds(54, 27, 383, 229);
+		panel.add(scrollPane);
+		
+		table = new JTable();
+		scrollPane.setColumnHeaderView(table);
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		
+		table.setModel(new javax.swing.table.DefaultTableModel(
+				new Object[][] {
+
+				}, new String[] { "Nº", "", "Nome " }) {
+			/**
+																																																																																	 * 
+																																																																																	 */
+
+			Class[] types = new Class[] { java.lang.Object.class,
+					java.lang.Boolean.class, java.lang.String.class };
+			boolean[] canEdit = new boolean[] { false, true, false };
+
+			public Class getColumnClass(int columnIndex) {
+				return types[columnIndex];
+			}
+
+			public boolean isCellEditable(int rowIndex, int columnIndex) {
+				return canEdit[columnIndex];
+			}
+		});
+		TableColumn col = table.getColumnModel().getColumn(0);
+		col.setPreferredWidth(50);
+
+		TableColumn col2 = table.getColumnModel().getColumn(1);
+		col2.setPreferredWidth(15);
+
+		TableColumn col3 = table.getColumnModel().getColumn(2);
+		
+		col3.setPreferredWidth(250);
+		table.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+		table.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+					public void mouseDragged(java.awt.event.MouseEvent evt) {
+						jTableAtributosMouseDragged(evt);
+					}
+				});
+		table.addMouseListener(new java.awt.event.MouseAdapter() {
+			public void mouseClicked(java.awt.event.MouseEvent evt) {
+				jTableAtributosMouseClicked(evt);
+			}
+		});
+		table.addKeyListener(new java.awt.event.KeyAdapter() {
+			public void keyPressed(java.awt.event.KeyEvent evt) {
+				jTableAtributosKeyPressed(evt);
+			}
+		});
+
+
+		
+	}
+	private void jTableAtributosMouseClicked(java.awt.event.MouseEvent evt) {
+	}
+
+	private void jTableAtributosKeyPressed(java.awt.event.KeyEvent evt) {
+	}
+
+	private void jTableAtributosMouseDragged(java.awt.event.MouseEvent evt) {
+	}
+}

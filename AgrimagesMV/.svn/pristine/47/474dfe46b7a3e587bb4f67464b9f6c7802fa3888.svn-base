@@ -1,0 +1,572 @@
+package mvc_view;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.HeadlessException;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import mvc_model.estruturais.Adapter.ImageAdapterJPEG;
+import mvc_model.estruturais.Adapter.ImageBMP;
+import mvc_model.estruturais.Adapter.ImageTIFF;
+import mvc_model.estruturais.Adapter.ImagemOutros;
+import mvc_model.estruturais.Adapter.ImagemTarget;
+
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
+
+import agrimages.Correcoes.AbstractFactoryFiltro;
+import agrimages.Correcoes.FactoryMaker;
+import agrimages.Correcoes.FiltroCor1Canal;
+import agrimages.Correcoes.FiltroCor3Canal;
+import agrimages.Correcoes.FiltroRuido1Canal;
+
+public class PanelCorrecao extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	File arquivo;
+    List<Mat> imagens;
+    int posList;
+    String EXIFF = ""; 
+	/**
+	 * Create the panel.
+	 */
+    
+    
+	public PanelCorrecao() {
+		setBorder(new LineBorder(new Color(0, 0, 0)));
+		//System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		initComponents();
+		imagens = new ArrayList<Mat>();
+        posList = -1;
+	}
+	
+	public File abrirArquivo(){
+        JFileChooser fc = new JFileChooser();
+        FileFilter ff1 = new FileNameExtensionFilter("Formato JPG (*.jpg)", "jpg");
+        FileFilter ff2 = new FileNameExtensionFilter("Formato JPEG (*.jpeg)", "jpeg");
+        FileFilter ff3 = new FileNameExtensionFilter("Formato PNG (*.png)", "png");
+        FileFilter ff4 = new FileNameExtensionFilter("Formato TIFF (*.Tiff)", "tiff");
+
+        fc.addChoosableFileFilter(ff1);
+        fc.addChoosableFileFilter(ff2);
+        fc.addChoosableFileFilter(ff3);
+        fc.addChoosableFileFilter(ff4);
+
+        //fc.setAcceptAllFileFilterUsed(false);
+
+        File arquivoImagem;
+        int returnVal = fc.showOpenDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            arquivoImagem = fc.getSelectedFile();
+            return arquivoImagem;
+        }
+        return null;
+    }
+	
+	public void readMetadata(File arq){
+		String formato[] = arq.getName().split("\\.");
+        String extensao = formato[1];
+        ImagemTarget imagem;
+        switch (extensao) {
+
+			case "jpg":
+			case "jpeg":
+				 imagem = new ImageAdapterJPEG(arq); 
+				imagem.carregarImagemMetadada();
+				EXIFF = imagem.getMetadata();
+				break;
+			case "tiff":
+				imagem = new ImageTIFF(arq); 
+				imagem.carregarImagemMetadada();
+				EXIFF = imagem.getMetadata();
+				break;
+			case "bmp":
+				imagem = new ImageBMP(arq); 
+				imagem.carregarImagemMetadada();
+				EXIFF = imagem.getMetadata();
+				break;
+			default:
+				imagem = new ImagemOutros(arq); 
+				imagem.carregarImagemMetadada();
+				EXIFF = imagem.getMetadata();
+				break;
+		}
+	}
+	
+	public ImageIcon showResult(Mat img) {
+        Mat tmp = new Mat();
+        int novoW = 0, novoH = 0;
+        if(img.width() > jLabelImagem.getWidth()){
+        	novoW = jLabelImagem.getWidth();
+        	novoH = (novoW*img.height())/img.width();
+        	
+        	if(novoH > jLabelImagem.getHeight()){
+        		novoH = jLabelImagem.getHeight();
+        		novoW = (novoH*img.width())/img.height();
+        	}
+        }else{
+        	novoW = img.width();
+        	if(img.height() > jLabelImagem.getHeight()){
+        		novoH = jLabelImagem.getHeight();
+        		novoW = (novoH*img.width())/img.height();
+        	}else{
+        		novoH = img.height();
+        	}
+        	
+        }
+        
+        Imgproc.resize(img, tmp, new Size(novoW, novoH));
+        MatOfByte matOfByte = new MatOfByte();
+        Highgui.imencode(".png", tmp, matOfByte);
+        byte[] byteArray = matOfByte.toArray();
+        BufferedImage bufImage;
+        try {
+            InputStream in = new ByteArrayInputStream(byteArray);
+            bufImage = ImageIO.read(in);
+            ImageIcon icon = new ImageIcon(bufImage);
+            return icon;
+        } catch (IOException | HeadlessException e) {
+            
+        }
+        return null;
+    }
+	
+	@Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        
+        jMenuBar1.setSize(new Dimension(getWidth(),jMenuBar1.getHeight()));
+        panelFundo.setSize(new Dimension(this.getWidth(),this.getHeight()-jMenuBar1.getHeight()));
+        jLabelImagem.setSize(panelFundo.getSize());
+        
+        if(posList > -1){
+			jLabelImagem.setIcon(showResult(imagens.get(posList)));
+		}
+        
+        revalidate();
+        repaint();
+        g.dispose();
+    }
+	
+	private void initComponents() {
+		
+		setLayout(null);
+		jMenuBar1 = new javax.swing.JMenuBar();
+		jMenuBar1.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 14));
+		jMenuBar1.setForeground(Color.BLACK);
+		jMenuBar1.setBackground(Color.WHITE);
+		jMenuBar1.setLocation(0, 0);
+		jMenuBar1.setSize(655, 32);
+		File = new javax.swing.JMenu();
+		File.setFont(new Font("Microsoft New Tai Lue", Font.BOLD, 17));
+		File.setForeground(Color.BLACK);
+		File.setBackground(Color.WHITE);
+        menuAbriImagem = new javax.swing.JMenuItem();
+        menuAbriImagem.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        menuSalvar = new JMenuItem();
+        menuSalvar.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        Edit = new javax.swing.JMenu();
+        Edit.setFont(new Font("Microsoft New Tai Lue", Font.BOLD, 17));
+        menuDesfazer = new javax.swing.JMenuItem();
+        menuDesfazer.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        menuRefazer = new javax.swing.JMenuItem();
+        menuRefazer.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        Image = new javax.swing.JMenu();
+        Image.setFont(new Font("Microsoft New Tai Lue", Font.BOLD, 17));
+        menuGray = new javax.swing.JMenuItem();
+        menuGray.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        jMenu3 = new javax.swing.JMenu();
+        jMenu3.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        menuThreshold = new javax.swing.JMenuItem();
+        menuThreshold.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        menuGaussian = new javax.swing.JMenuItem();
+        menuGaussian.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        menuMedian = new javax.swing.JMenuItem();
+        menuMedian.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        menuSobel = new javax.swing.JMenuItem();
+        menuSobel.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        panelFundo = new JPanel();
+        panelFundo.setBorder(new LineBorder(new Color(0, 0, 0)));
+        menuHSV = new JMenuItem();
+        
+		
+        panelFundo.setBounds(0, 31, 655, 418);
+		add(panelFundo);
+		panelFundo.setLayout(null);
+		jLabelImagem = new JLabel("");
+		jLabelImagem.setHorizontalAlignment(SwingConstants.CENTER);
+		jLabelImagem.setBounds(0, 0, 655, 453);
+		panelFundo.add(jLabelImagem);
+		
+		
+		
+		File.setText("Arquivo");
+
+        menuAbriImagem.setText("Abrir");
+        menuAbriImagem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuAbriImagemActionPerformed(evt);
+            }
+        });
+        File.add(menuAbriImagem);
+
+        jMenuBar1.add(File);
+        
+        
+        menuSalvar.setText("Salvar");
+        menuSalvar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuSalvarActionPerformed(evt);
+            }
+        });
+        
+        File.add(menuSalvar);
+
+        Edit.setText("Editar");
+
+        menuDesfazer.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
+        menuDesfazer.setText("Desfazer");
+        menuDesfazer.setEnabled(false);
+        menuDesfazer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuDesfazerActionPerformed(evt);
+            }
+        });
+        Edit.add(menuDesfazer);
+
+        menuRefazer.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
+        menuRefazer.setText("Refazer");
+        menuRefazer.setEnabled(false);
+        menuRefazer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuRefazerActionPerformed(evt);
+            }
+        });
+        Edit.add(menuRefazer);
+
+        jMenuBar1.add(Edit);
+
+        Image.setText("Imagem");
+
+        menuGray.setText("Gray");
+        menuGray.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuGrayActionPerformed(evt);
+            }
+        });
+        Image.add(menuGray);
+
+        jMenu3.setText("Filtros");
+
+        menuThreshold.setText("Threshold");
+        menuThreshold.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuThresholdActionPerformed(evt);
+            }
+        });
+        jMenu3.add(menuThreshold);
+
+        menuGaussian.setText("Gaussian Blur");
+        menuGaussian.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuGaussianActionPerformed(evt);
+            }
+        });
+        jMenu3.add(menuGaussian);
+
+        menuMedian.setText("Median Blur");
+        menuMedian.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuMedianActionPerformed(evt);
+            }
+        });
+        jMenu3.add(menuMedian);
+
+        menuSobel.setText("Sobel");
+        menuSobel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                menuSobelActionPerformed(evt);
+            }
+        });
+        
+        
+        menuHSV.setText("HSV");
+        menuHSV.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	menuHSVActionPerformed(evt);
+            }
+        });
+        menuHSV.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        Image.add(menuHSV);
+        jMenu3.add(menuSobel);
+
+        Image.add(jMenu3);
+
+        jMenuBar1.add(Image);
+        
+        menuErode = new JMenuItem();
+        menuErode.setText("Erode");
+        menuErode.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	menuErodeActionPerformed(evt);
+            }
+        });
+        menuErode.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        Image.add(menuErode);
+        
+        menuDilate = new JMenuItem();
+        menuDilate.setText("Dilate");
+        menuDilate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+            	menuDilateActionPerformed(evt);
+            }
+        });
+        menuDilate.setFont(new Font("Microsoft New Tai Lue", Font.PLAIN, 15));
+        Image.add(menuDilate);
+        add(jMenuBar1);
+	}
+	
+	private void menuAbriImagemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAbriImagemActionPerformed
+        arquivo = abrirArquivo();
+                Mat image = Highgui.imread(arquivo.getPath());
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, image);
+        }else{
+            imagens.add(image);
+        }
+        
+        posList++;
+    }
+
+	private void menuSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuAbriImagemActionPerformed
+		JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Informe o nome do arquivo");
+        int userSelection = fileChooser.showSaveDialog(null);
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            Highgui.imwrite(fileToSave.getAbsolutePath(), imagens.get(posList));
+        }
+    }
+	
+    private void menuGrayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGrayActionPerformed
+    	FactoryMaker creator = new FactoryMaker();
+    	AbstractFactoryFiltro filtro = creator.getFactory("cor");
+        FiltroCor1Canal gray = (FiltroCor1Canal) filtro.AplicarFiltro1Canal(imagens.get(posList), 1);
+        Mat result = gray.getResult();
+        
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, result);
+        }else{
+            imagens.add(result);
+        }
+        //Imgproc.calcHist(images, channels, mask, hist, histSize, ranges);
+        posList++;
+        menuDesfazer.setEnabled(true);
+    }
+     
+    private void menuHSVActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGrayActionPerformed
+    	FactoryMaker creator = new FactoryMaker();
+    	AbstractFactoryFiltro filtro = creator.getFactory("cor");
+        
+    	FiltroCor3Canal hsv = (FiltroCor3Canal) filtro.AplicarFiltro3Canal(imagens.get(posList), 1);
+    	Mat result = hsv.getResult();
+    	
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, result);
+        }else{
+            imagens.add(result);
+        }
+        //Imgproc.calcHist(images, channels, mask, hist, histSize, ranges);
+        posList++;
+        menuDesfazer.setEnabled(true);
+    	
+    }
+    
+    private void menuThresholdActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuThresholdActionPerformed
+    	FactoryMaker creator = new FactoryMaker();
+    	AbstractFactoryFiltro filtro = creator.getFactory("ruido");
+    	FiltroRuido1Canal threshold = (FiltroRuido1Canal) filtro.AplicarFiltro1Canal(imagens.get(posList), 3);
+        
+    	Mat result = threshold.getResult();
+        
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, result);
+        }else{
+            imagens.add(result);
+        }
+        //Imgproc.calcHist(images, channels, mask, hist, histSize, ranges);
+        posList++;
+        menuDesfazer.setEnabled(true);
+    }
+
+    private void menuGaussianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuGaussianActionPerformed
+    	FactoryMaker creator = new FactoryMaker();
+    	AbstractFactoryFiltro filtro = creator.getFactory("ruido");
+    	FiltroCor1Canal gaussian =  (FiltroCor1Canal) filtro.AplicarFiltro1Canal(imagens.get(posList), 15);
+    	Mat result = gaussian.getResult();
+    	
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, result);
+        }else{
+            imagens.add(result);
+        }
+        //Imgproc.calcHist(images, channels, mask, hist, histSize, ranges);
+        posList++;
+        menuDesfazer.setEnabled(true);
+    }
+
+    private void menuMedianActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMedianActionPerformed
+    	FactoryMaker creator = new FactoryMaker();
+    	AbstractFactoryFiltro filtro = creator.getFactory("ruido");
+    	FiltroRuido1Canal median = (FiltroRuido1Canal) filtro.AplicarFiltro1Canal(imagens.get(posList), 15);
+        Mat result = median.getResult();
+        
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, result);
+        }else{
+            imagens.add(result);
+        }
+        //Imgproc.calcHist(images, channels, mask, hist, histSize, ranges);
+        posList++;
+        menuDesfazer.setEnabled(true);
+    }
+
+    private void menuErodeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMedianActionPerformed
+        Mat src = imagens.get(posList);
+        Mat dst = new Mat(src.height(),src.width(),src.type());
+        int erosion_size = 5;
+        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2*erosion_size + 1, 2*erosion_size+1));
+        Imgproc.erode(imagens.get(posList), dst, element);
+        
+        Mat diferenca = new Mat();
+        Core.bitwise_xor(src, dst, diferenca);
+        
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, diferenca);
+        }else{
+            imagens.add(diferenca);
+        }
+        posList++;
+        menuDesfazer.setEnabled(true);
+    }
+    
+    private void menuDilateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuMedianActionPerformed
+    	Mat src = imagens.get(posList);
+        Mat dst = new Mat(src.height(),src.width(),src.type());
+        int dilation_size = 5;
+        Mat element = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new  Size(2*dilation_size + 1, 2*dilation_size+1));
+        Imgproc.dilate(imagens.get(posList), dst, element);
+        
+        Mat diferenca = new Mat();
+        Core.bitwise_xor(src, dst, diferenca);
+        
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, diferenca);
+        }else{
+            imagens.add(diferenca);
+        }
+        posList++;
+        menuDesfazer.setEnabled(true);
+    }
+    
+    private void menuSobelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuSobelActionPerformed
+        Mat imagem = imagens.get(posList);
+        Mat grad, abs_grad_x, abs_grad_y;
+        
+        abs_grad_x = new Mat(imagem.height(),imagem.width(),CvType.CV_8S);
+        abs_grad_y = new Mat(imagem.height(),imagem.width(),CvType.CV_8S);
+        grad = new Mat(imagem.height(),imagem.width(),CvType.CV_8S);
+        
+        FactoryMaker creator = new FactoryMaker();
+    	AbstractFactoryFiltro filtro = creator.getFactory("cor");
+        FiltroRuido1Canal sobelX = (FiltroRuido1Canal) filtro.AplicarFiltro1Canal(imagens.get(posList), 21);
+        Mat resultX = sobelX.getResult();
+        Core.convertScaleAbs(resultX, abs_grad_x);
+        
+        FiltroRuido1Canal sobelY = (FiltroRuido1Canal) filtro.AplicarFiltro1Canal(imagens.get(posList), 22);
+        Mat resultY = sobelY.getResult();
+        Core.convertScaleAbs(resultY, abs_grad_y);
+                
+        Core.addWeighted( abs_grad_x, 0.5, abs_grad_y, 0.5, 0, grad);
+        
+        if(posList != imagens.size()-1){
+            imagens.set(posList + 1, grad);
+        }else{
+            imagens.add(grad);
+        }
+        posList++;
+        menuDesfazer.setEnabled(true);
+    }
+
+    private void menuDesfazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuDesfazerActionPerformed
+        if(posList > 0){
+            posList--;
+            if(posList == 0){
+                menuDesfazer.setEnabled(false);
+            }
+        }
+        menuRefazer.setEnabled(true);
+    }
+
+    private void menuRefazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_menuRefazerActionPerformed
+        if(posList < (imagens.size() - 1)){
+            posList++;
+            if(posList == (imagens.size() - 1)){
+                menuRefazer.setEnabled(false);
+            }
+        }
+    }
+	
+	private JPanel panelFundo;
+	private JMenuBar jMenuBar1;
+	private JMenu Edit;
+    private JMenu File;
+    private JMenu Image;
+    private JMenu jMenu3;
+	private JMenuItem menuAbriImagem;
+    private JMenuItem menuDesfazer;
+    private JMenuItem menuGaussian;
+    private JMenuItem menuGray;
+    private JMenuItem menuSalvar;
+    private JMenuItem menuMedian;
+    private JMenuItem menuRefazer;
+    private JMenuItem menuSobel;
+    private JMenuItem menuThreshold;
+    private JLabel jLabelImagem;
+    private JMenuItem menuHSV;
+    private JMenuItem menuErode;
+    private JMenuItem menuDilate;
+}

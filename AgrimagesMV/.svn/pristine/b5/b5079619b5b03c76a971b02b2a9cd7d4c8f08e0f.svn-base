@@ -1,0 +1,7 @@
+package agrimages.PadraoFactoryMethod;
+
+import org.opencv.core.Mat;
+
+public interface CreatorRecorte {
+	public Recorte getRecorte(Mat src, Object pontos);
+}

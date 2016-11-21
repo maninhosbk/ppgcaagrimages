@@ -1,0 +1,23 @@
+package agrimages.Correcoes;
+
+import org.opencv.core.Mat;
+
+public class ConcreteFactoryRuido implements AbstractFactoryFiltro{
+
+	@Override
+	public AbstractFiltro1Canal AplicarFiltro1Canal(Mat imagem, int filtro) {
+		// TODO Auto-generated method stub
+		AbstractFiltro1Canal p = new FiltroRuido1Canal();
+		p.filtrarImagem1Canal(imagem, filtro);
+		return p;
+	}
+
+	@Override
+	public AbstractFiltro3Canal AplicarFiltro3Canal(Mat imagem, int filtro) {
+		// TODO Auto-generated method stub
+		AbstractFiltro3Canal p = new FiltroRuido3Canal();
+		p.filtrarImagem3Canal(imagem, filtro);
+		return p;
+	}
+
+}

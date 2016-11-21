@@ -1,0 +1,8 @@
+package agrimages.PadraoAbstractFactory;
+
+import org.opencv.core.Mat;
+
+public interface AbstractProductRuido {
+	public void corrigirRuido(Mat imagem, int filtro);
+	public Mat getResult();
+}

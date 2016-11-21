@@ -1,0 +1,14 @@
+package mvc_model.criacionais.AbstractFactory;
+
+public class FactoryMaker {
+	private AbstractFactoryFiltro filtro = null;
+	
+	public AbstractFactoryFiltro getFactory(String option){
+		if(option.equals("cor")){
+			filtro = new ConcreteFactoryCor();
+		}else if(option.equals("ruido")){
+			filtro = new ConcreteFactoryRuido();
+		}
+		return filtro;
+	}
+}

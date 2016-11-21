@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</property>
+		<property name="hibernate.connection.url">jdbc:postgresql://localhost:5432/agrimages?autoReconnect=true</property>
+		<property name="hibernate.connection.driver_class">org.postgresql.Driver</property>
+		<property name="hibernate.connection.username">admin</property>
+		<property name="hibernate.connection.password">admin</property>
+		<property name="hibernate.format_sql">true</property>
+		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.use_sql_comments">false</property>
+
+		<!-- Disable the second-level cache -->
+		<property name="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</property>
+		<!-- DB schema will be updated if needed -->
+		<property name="hbm2ddl.auto">update</property>
+		<property name="hibernate.current_session_context_class">thread</property>
+
+		<!-- mapeamentos -->
+		<mapping class="mvc_model.model.AreaExperimental" />
+		<mapping class="mvc_model.model.Camera" />
+		<mapping class="mvc_model.model.Cultivo" />
+		<mapping class="mvc_model.model.CanalCor" />
+		<mapping class="mvc_model.model.Fabricante" />
+		<mapping class="mvc_model.model.Fazenda" />
+		<mapping class="mvc_model.model.Operador" />
+		<mapping class="mvc_model.model.Pessoa" />
+		<mapping class="mvc_model.model.RPA" />
+		<mapping class="mvc_model.model.Telefone" />
+		<mapping class="mvc_model.model.TipoExperimento" />
+		<mapping class="mvc_model.model.Voo" />		
+	</session-factory>
+</hibernate-configuration>

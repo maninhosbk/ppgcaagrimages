@@ -1,0 +1,97 @@
+package mvc_view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
+
+import mvc_model.estruturais.Facade.MiningFacade;
+import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.classifiers.functions.SMO;
+import weka.classifiers.trees.J48;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.converters.CSVLoader;
+
+import javax.swing.ListSelectionModel;
+
+public class PanelVoo extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private List<Instances> data;
+	private JTable table;
+		/**
+	 * Create the panel.
+	 */
+
+	
+	@SuppressWarnings({ "serial", "rawtypes", "unchecked" })
+	public PanelVoo() {
+		setBackground(Color.WHITE);
+		setLayout(null);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panel.setBackground(Color.WHITE);
+		panel.setBounds(10, 35, 611, 300);
+		add(panel);
+		panel.setLayout(null);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBorder(new LineBorder(new Color(130, 135, 144)));
+		scrollPane.setBounds(40, 22, 532, 231);
+		panel.add(scrollPane);
+		
+		table = new JTable();
+		table.setModel(new DefaultTableModel(
+			new Object[][] {
+			},
+			new String[] {
+				"Resolu\u00E7\u00E3o", "RPA", "Experimento", "Fazenda", "Operador", "Data"
+			}
+		));
+		scrollPane.setViewportView(table);
+		
+		JButton btnTeste_1 = new JButton("Novo");
+		btnTeste_1.setBounds(29, 264, 57, 23);
+		panel.add(btnTeste_1);
+		
+		JButton btnEditar = new JButton("Editar");
+		btnEditar.setBounds(184, 264, 89, 23);
+		panel.add(btnEditar);
+		
+		JButton btnExcluir = new JButton("Excluir");
+		btnExcluir.setBounds(355, 264, 89, 23);
+		panel.add(btnExcluir);
+
+
+		
+	}
+}
